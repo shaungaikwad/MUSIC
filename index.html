@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Player</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: url('./asset/pexels-deepak-murali-437548-1273246.jpg') no-repeat center center/cover;
+            text-align: center;
+            color: white;
+            height: 100vh;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .container {
+            width: 90%;
+            max-width: 800px;
+        }
+        .player {
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .controls button {
+            font-size: 20px;
+            margin: 10px;
+            padding: 10px;
+            cursor: pointer;
+        }
+        .song-table {
+            width: 100%;
+            border-collapse: collapse;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .song-table tr {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+        .song-table td {
+            border: 1px solid white;
+            padding: 10px;
+            text-align: center;
+            flex: 1;
+        }
+        .like-btn {
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>SOUTH BY SHREE</h1>
+        <div class="player">
+            <audio id="audio"></audio>
+            <div class="controls">
+                <button onclick="prevSong()">⏮️</button>
+                <button onclick="togglePlay()" id="playPause">▶️</button>
+                <button onclick="nextSong()">⏭️</button>
+                <button onclick="stopMusic()">⏹️</button>
+            </div>
+            <p id="songTitle">Now Playing: </p>
+        </div>
+        <h2>All Songs</h2>
+        <table class="song-table" id="songTable"></table>
+        <h2>Liked Songs</h2>
+        <ul class="playlist" id="likedSongs"></ul>
+    </div>
+    <script>
+        const songs = [
+            { src: "./asset/AARUYIRE.mp3", name: "AARUYIRE" },
+            { src: "./asset/ABIKAPATHY.mp3", name: "ABIKAPATHY" },
+            { src: "./asset/AE MAANPURU MANGAIYAE.mp3", name: "AE MAANPURU MANGAIYAE" },
+            { src: "./asset/ALAI PAYUTHEY.mp3", name: "ALAI PAYUTHEY" },
+            { src: "./asset/AZEEM O SHAAN.mp3", name: "AZEEM O SHAAN" },
+            { src: "./asset/Ee HRIDAYAM.mp3", name: "Ee HRIDAYAM" },
+            { src: "./asset/KADHAL SADUGUDU.mp3", name: "KADHAL SADUGUDU" },
+            { src: "./asset/KANMANI ANBODU.mp3", name: "KANMANI ANBODU" },
+            { src: "./asset/KANNALANE ENADHU.mp3", name: "KANNALANE ENADHU" },
+            { src: "./asset/NANNARE.mp3", name: "NANNARE" },
+            { src: "./asset/OMANE.mp3", name: "OMANE" },
+            { src: "./asset/PACHAI NIRAME.mp3", name: "PACHAI NIRAME" },
+            { src: "./asset/PATTUDUTHU VANNATHUM.mp3", name: "PATTUDUTHU VANNATHUM" },
+            { src: "./asset/RINGA RINGA.mp3", name: "RINGA RINGA" },
+            { src: "./asset/SAAYA SANJALE.mp3", name: "SAAYA SANJALE" },
+            { src: "./asset/SRI VENKATESWARA STOTRAM.mp3", name: "SRI VENKATESWARA STOTRAM" },
+            { src: "./asset/THAAI MANAM.mp3", name: "THAAI MANAM" },
+            { src: "./asset/ULLAM PAADUM.mp3", name: "ULLAM PAADUM" },
+            { src: "./asset/VEERA RAJA VEERA.mp3", name: "VEERA RAJA VEERA" },
+           
+        ];
+        let likedSongs = [];
+        let currentSongIndex = 0;
+        const audio = document.getElementById("audio");
+        const playPauseButton = document.getElementById("playPause");
+        const songTitle = document.getElementById("songTitle");
+        const songTable = document.getElementById("songTable");
+        const likedSongsList = document.getElementById("likedSongs");
+
+        function togglePlay() {
+            if (audio.paused) {
+                audio.play();
+                playPauseButton.textContent = "⏸️";
+            } else {
+                audio.pause();
+                playPauseButton.textContent = "▶️";
+            }
+        }
+
+        function nextSong() {
+            currentSongIndex = (currentSongIndex + 1) % songs.length;
+            updateSong();
+        }
+
+        function prevSong() {
+            currentSongIndex = (currentSongIndex - 1 + songs.length) % songs.length;
+            updateSong();
+        }
+
+        function stopMusic() {
+            audio.pause();
+            audio.currentTime = 0;
+            playPauseButton.textContent = "▶️";
+        }
+
+        function updateSong() {
+            audio.src = songs[currentSongIndex].src;
+            songTitle.textContent = `Now Playing: ${songs[currentSongIndex].name}`;
+            audio.play();
+            playPauseButton.textContent = "⏸️";
+        }
+
+        function loadSongList() {
+            songTable.innerHTML = "";
+            let row;
+            songs.forEach((song, index) => {
+                if (index % 5 === 0) {
+                    row = document.createElement("tr");
+                    songTable.appendChild(row);
+                }
+                const cell = document.createElement("td");
+                cell.textContent = song.name;
+                cell.onclick = () => {
+                    currentSongIndex = index;
+                    updateSong();
+                };
+                const likeBtn = document.createElement("span");
+                likeBtn.textContent = "❤️";
+                likeBtn.classList.add("like-btn");
+                likeBtn.onclick = (event) => {
+                    event.stopPropagation();
+                    likeSong(song);
+                };
+                cell.appendChild(likeBtn);
+                row.appendChild(cell);
+            });
+        }
+
+        function likeSong(song) {
+            if (!likedSongs.some(s => s.src === song.src)) {
+                likedSongs.push(song);
+                updateLikedSongs();
+            }
+        }
+
+        function updateLikedSongs() {
+            likedSongsList.innerHTML = "";
+            likedSongs.forEach(song => {
+                const li = document.createElement("li");
+                li.textContent = song.name;
+                li.onclick = () => {
+                    audio.src = song.src;
+                    songTitle.textContent = `Now Playing: ${song.name}`;
+                    audio.play();
+                };
+                likedSongsList.appendChild(li);
+            });
+        }
+
+        loadSongList();
+    </script>
+</body>
+</html>
